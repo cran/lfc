@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Florian Erhard" />
+
+<meta name="date" content="2022-04-25" />
+
+<title>Using LFC</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using LFC</h1>
+<h4 class="author">Florian Erhard</h4>
+<h4 class="date">2022-04-25</h4>
+
+
+
+<p>Digital expression measurements (e.g. RNA-seq) are often used to determine the change of quantities upon some treatment or stimulus. The resulting value of interest is the <em>fold change</em> (often logarithmized).</p>
+<p>This effect size of the change is often treated as a value that can be computed as <span class="math inline">\(lfc(A,B)=\log_2 \frac{A}{B}\)</span>. However, due to the probabilistic nature of the experiments, the effect size rather is a random variable that must be estimated. This fact becomes obvious when considering that <span class="math inline">\(A\)</span> or <span class="math inline">\(B\)</span> can be 0, even if the true abundance is non-zero.</p>
+<p>We have shown that this can be modelled in a Bayesian framework [1,2]. The intuitively computed effect size is the maximum likelihood estimator of a binomial model, where the effect size is not represented as fold change, but as proportion (of note, the log fold change simply is the logit transformed proportion). The Bayesian prior corresponds to pseudocounts frequently used to prevent infinite fold changes by <span class="math inline">\(A\)</span> or <span class="math inline">\(B\)</span> being zero. Furthermore, the Bayesian framework offers more advanced estimators (e.g. interval estimators or the posterior mean, which is the optimal estimator in terms of squared errors).</p>
+<p>This R package offers the implementation to harness the power of this framework.</p>
+<div id="basic-usage" class="section level2">
+<h2>Basic usage</h2>
+<p>The most basic function to estimate effect sizes is</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">PsiLFC</span>(A,B)</span></code></pre></div>
+<p><span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> are vectors of counts, corresponding to the n genes in conditions <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> (i.e. they are columns from the normal count matrices). What PsiLFC does it to obtain reasonable pseudocounts (see next section), compute the posterior mean for each entry, and then output normalized (i.e. median-centered) effect sizes in the log<span class="math inline">\(_2\)</span> fold change representation.</p>
+<p>Let’s consider a real world example:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">library</span>(DESeq2)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="kw">library</span>(lfc)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="kw">data</span>(airway, <span class="dt">package=</span><span class="st">&quot;airway&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a>A &lt;-<span class="st"> </span><span class="kw">assay</span>(airway)[,<span class="dv">2</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a>B &lt;-<span class="st"> </span><span class="kw">assay</span>(airway)[,<span class="dv">1</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a>ll &lt;-<span class="st"> </span><span class="kw">PsiLFC</span>(A,B)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="kw">plot</span>(<span class="kw">ecdf</span>(ll),<span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">xlab=</span><span class="st">&quot;Log2 fold change treated/untreated&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Cumulative frequency&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Cell N61311&quot;</span>,<span class="dt">col=</span><span class="st">&#39;blue&#39;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="kw">lines</span>(<span class="kw">ecdf</span>(<span class="kw">CenterMedian</span>(<span class="kw">log2</span>((A<span class="op">+</span><span class="dv">1</span>)<span class="op">/</span>(B<span class="op">+</span><span class="dv">1</span>)))),<span class="dt">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>This shows the log fold change distributions estimated by the posterior mean (blue) and the intuitive way using pseudocounts of 1 (red). This distribution is heavily distorted by several genes with no reads in any of the two conditions. Interestingly, the intuitive way of computing effect sizes results in an asymmetric distribution with more downregulated than upregulated genes.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">plot</span>(<span class="kw">ecdf</span>(ll[A<span class="op">&gt;</span><span class="dv">0</span> <span class="op">|</span><span class="st"> </span>B<span class="op">&gt;</span><span class="dv">0</span>]),<span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">xlab=</span><span class="st">&quot;Log2 fold change treated/untreated&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Cumulative frequency&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Cell N61311&quot;</span>,<span class="dt">col=</span><span class="st">&#39;blue&#39;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="kw">lines</span>(<span class="kw">ecdf</span>(<span class="kw">CenterMedian</span>(<span class="kw">log2</span>((A<span class="op">+</span><span class="dv">1</span>)<span class="op">/</span>(B<span class="op">+</span><span class="dv">1</span>))[A<span class="op">&gt;</span><span class="dv">0</span> <span class="op">|</span><span class="st"> </span>B<span class="op">&gt;</span><span class="dv">0</span>])),<span class="dt">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Here, only genes are considered that have at least one read in one of the two conditions. The intuitive fold changes still appear to overestimate changes, as well as show more artifacts.</p>
+<p>It is also possible to directly estimate effect sizes on SummarizedExperiment objects:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">head</span>(<span class="kw">PsiLFC.se</span>(airway,<span class="dt">contrast=</span><span class="kw">c</span>(<span class="st">&quot;dex&quot;</span>,<span class="st">&quot;untrt&quot;</span>,<span class="st">&quot;trt&quot;</span>)))</span></code></pre></div>
+<pre><code>## ENSG00000000003 ENSG00000000005 ENSG00000000419 ENSG00000000457 ENSG00000000460 
+##      0.33634752      0.00000000     -0.21035628     -0.04804218      0.10586343 
+## ENSG00000000938 
+##      0.89037506</code></pre>
+<p>Also, this package provides a drop-in replacement for DESeq2’s <code>results</code> function:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>dds &lt;-<span class="st"> </span><span class="kw">DESeqDataSetFromMatrix</span>(<span class="dt">countData =</span> <span class="kw">assay</span>(airway),<span class="dt">colData =</span> <span class="kw">colData</span>(airway),<span class="dt">design=</span> <span class="op">~</span><span class="st"> </span>dex)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>dds &lt;-<span class="st"> </span><span class="kw">DESeq</span>(dds)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>res &lt;-<span class="st"> </span><span class="kw">results</span>(dds, <span class="dt">contrast=</span><span class="kw">c</span>(<span class="st">&quot;dex&quot;</span>,<span class="st">&quot;untrt&quot;</span>,<span class="st">&quot;trt&quot;</span>),<span class="dt">cre=</span><span class="ot">TRUE</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="kw">head</span>(res)</span></code></pre></div>
+<pre><code>## DataFrame with 6 rows and 9 columns
+##                   baseMean log2FoldChange     lfcSE      stat    pvalue
+##                  &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+## ENSG00000000003 708.602170      0.3788470  0.173141  2.188082 0.0286636
+## ENSG00000000005   0.000000             NA        NA        NA        NA
+## ENSG00000000419 520.297901     -0.2037604  0.100599 -2.025478 0.0428183
+## ENSG00000000457 237.163037     -0.0340428  0.126279 -0.269584 0.7874802
+## ENSG00000000460  57.932633      0.1171786  0.301237  0.388992 0.6972820
+## ENSG00000000938   0.318098      1.7245505  3.493633  0.493627 0.6215698
+##                      padj     PsiLFC Credible 0.05 Credible 0.95
+##                 &lt;numeric&gt;  &lt;numeric&gt;     &lt;numeric&gt;     &lt;numeric&gt;
+## ENSG00000000003  0.139383  0.3363475      0.273959     0.3988301
+## ENSG00000000005        NA  0.0000000     -1.817845     1.8398897
+## ENSG00000000419  0.183458 -0.2103563     -0.282880    -0.1378499
+## ENSG00000000457  0.930540 -0.0480422     -0.155755     0.0597279
+## ENSG00000000460  0.895428  0.1058634     -0.112729     0.3250639
+## ENSG00000000938        NA  0.8903751     -0.665848     2.5667235</code></pre>
+<p><strong>Important:</strong> To make this work, load <code>lfc</code> after <code>DESeq2</code>!</p>
+<p>Note that here we also computed the 90% credible interval. The parameter <code>cre</code> can also be given to <code>PsiLFC</code> or <code>PsiLFC.se</code>!</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ol style="list-style-type: decimal">
+<li>Erhard, F. (2018). Estimating pseudocounts and fold changes for digital expression measurements. Bioinformatics, 34(23), 4054–4063. <a href="https://doi.org/10.1093/bioinformatics/bty471" class="uri">https://doi.org/10.1093/bioinformatics/bty471</a></li>
+<li>Erhard, F., &amp; Zimmer, R. (2015). Count ratio model reveals bias affecting NGS fold changes. Nucleic Acids Research, 43(20), e136–e136. <a href="https://doi.org/10.1093/nar/gkv696" class="uri">https://doi.org/10.1093/nar/gkv696</a></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
